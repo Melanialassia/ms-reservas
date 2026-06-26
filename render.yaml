@@ -1,0 +1,32 @@
+# Blueprint de Render para api-turnos.
+# En Render: New → Blueprint → seleccionar este repo. Luego completar en el dashboard
+# las variables marcadas con sync:false.
+services:
+  - type: web
+    name: api-turnos
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: node dist/main
+    healthCheckPath: /reservas
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_SSL
+        value: "true"
+      # Connection string del Session Pooler de Supabase (IPv4, puerto 5432)
+      - key: DATABASE_URL
+        sync: false
+      # URLs públicas de los otros microservicios en Render
+      - key: USUARIOS_URL
+        sync: false
+      - key: CANCHAS_URL
+        sync: false
+      # Reglas de negocio (sobreescriben configuraciones de BD si se definen)
+      - key: SENA_PORCENTAJE_DEFAULT
+        value: "30"
+      - key: HORAS_ANTICIPACION_MIN
+        value: "2"
+      - key: DURACION_MAXIMA_HORAS
+        value: "3"
