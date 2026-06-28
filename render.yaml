@@ -9,12 +9,15 @@ services:
     region: oregon
     buildCommand: npm install && npm run build
     startCommand: node dist/main
-    healthCheckPath: /reservas
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: DATABASE_SSL
         value: "true"
+      # Secreto interno: MISMO valor en gateway y en los 4 microservicios.
+      - key: INTERNAL_SECRET
+        sync: false
       # Connection string del Session Pooler de Supabase (IPv4, puerto 5432)
       - key: DATABASE_URL
         sync: false

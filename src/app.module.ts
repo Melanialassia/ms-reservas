@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ReservasModule } from './reservas/reservas.module';
 import { DisponibilidadModule } from './disponibilidad/disponibilidad.module';
+import { HealthController } from './health/health.controller';
+import { InternalAuthGuard } from './common/internal-auth.guard';
 
 @Module({
   imports: [
@@ -16,5 +19,7 @@ import { DisponibilidadModule } from './disponibilidad/disponibilidad.module';
     ReservasModule,
     DisponibilidadModule,
   ],
+  controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: InternalAuthGuard }],
 })
 export class AppModule {}
