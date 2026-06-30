@@ -31,6 +31,7 @@ export class ReservasService {
 
   async findAll(filtros: {
     fecha?: string;
+    desde?: string;
     canchaId?: number;
     clienteId?: number;
     estado?: string;
@@ -39,6 +40,7 @@ export class ReservasService {
     const q = this.reservaRepo.createQueryBuilder('r');
 
     if (filtros.fecha)     q.andWhere('r.fecha = :fecha',        { fecha: filtros.fecha });
+    if (filtros.desde)     q.andWhere('r.fecha >= :desde',       { desde: filtros.desde });
     if (filtros.canchaId)  q.andWhere('r.canchaId = :canchaId',  { canchaId: filtros.canchaId });
     if (filtros.clienteId) q.andWhere('r.clienteId = :clienteId',{ clienteId: filtros.clienteId });
     if (filtros.estado)    q.andWhere('r.estado = :estado',      { estado: filtros.estado });
@@ -79,6 +81,7 @@ export class ReservasService {
 
   async create(dto: CreateReservaDto) {
     this.validarHorario(dto.horaInicio, dto.horaFin);
+    await this.validarCancha(dto.canchaId);
     await this.validarDisponibilidad(dto.canchaId, dto.fecha, dto.horaInicio, dto.horaFin);
     await this.validarCliente(dto.clienteId);
 
@@ -190,6 +193,22 @@ export class ReservasService {
       throw new BadRequestException(
         `El cliente alcanzó el máximo de ${maxNoShows} no-shows y no puede realizar reservas`,
       );
+    }
+  }
+
+  private async validarCancha(canchaId: number) {
+    let cancha: any;
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(`${this.canchasUrl}/canchas/${canchaId}`),
+      );
+      cancha = data;
+    } catch (error) {
+      if (error.response?.status === 404) throw new NotFoundException(`Cancha ${canchaId} no encontrada`);
+      throw new ServiceUnavailableException('No se pudo validar la cancha');
+    }
+    if (cancha.estado !== 'disponible') {
+      throw new BadRequestException(`La cancha está ${cancha.estado} y no admite reservas`);
     }
   }
 

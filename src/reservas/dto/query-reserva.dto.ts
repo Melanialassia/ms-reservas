@@ -9,6 +9,10 @@ export class QueryReservasDto {
   fecha?: string;
 
   @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'desde debe ser YYYY-MM-DD' })
+  desde?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
